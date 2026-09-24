@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import { pool } from "./config/database";
 
 dotenv.config();
 
@@ -15,6 +16,25 @@ app.get("/api/health", (_req, res) => {
     status: "ok",
     message: "Enterprise AI RAG API is running"
   });
+});
+
+app.get("/api/db-test", async (_req, res) => {
+  try {
+    const result = await pool.query("SELECT NOW() AS current_time");
+
+    res.json({
+      status: "ok",
+      database: "connected",
+      time: result.rows[0].current_time,
+    });
+  } catch (error) {
+    console.error("Database connection failed:", error);
+
+    res.status(500).json({
+      status: "error",
+      database: "connection failed",
+    });
+  }
 });
 
 app.listen(PORT, () => {
