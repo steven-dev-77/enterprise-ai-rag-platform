@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { pool } from "./config/database";
 
+import documentRoutes from "./routes/documentRoutes";
+
 dotenv.config();
 
 const app = express();
@@ -10,6 +12,8 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+
+app.use("/api/documents", documentRoutes);
 
 app.get("/api/health", (_req, res) => {
   res.json({
