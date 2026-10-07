@@ -2,6 +2,9 @@ import { Request, Response } from "express";
 import { PDFParse } from "pdf-parse";
 import { createDocument } from "../services/documentService";
 
+import { chunkText } from "../services/chunkingService";
+import { createDocumentChunks } from "../services/documentService";
+
 export async function uploadDocument(req: Request, res: Response) {
   try {
     if (!req.file) {
@@ -21,7 +24,7 @@ export async function uploadDocument(req: Request, res: Response) {
         content = pdfData.text;
       } finally {
         await parser.destroy();
-      }   
+      }
     } else {
       content = req.file.buffer.toString("utf-8");
     }
@@ -30,6 +33,17 @@ export async function uploadDocument(req: Request, res: Response) {
       mimetype: req.file.mimetype,
       size: req.file.size,
     });
+
+    const chunks = chunkText(content, 1000, 200);
+
+    await createDocumentChunks(
+      document.id,
+      chunks,
+      {
+        filename,
+        mimetype: req.file.mimetype,
+      }
+    );
 
     return res.status(201).json({
       status: "ok",
