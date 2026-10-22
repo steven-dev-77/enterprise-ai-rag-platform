@@ -42,3 +42,20 @@ export async function createDocumentChunks(
     );
   }
 }
+
+
+export async function saveChunkEmbedding(
+  chunkId: string,
+  embedding: number[]
+) {
+  const vectorValue = `[${embedding.join(",")}]`;
+
+  await pool.query(
+    `
+    UPDATE document_chunks
+    SET embedding = $1::vector
+    WHERE id = $2
+    `,
+    [vectorValue, chunkId]
+  );
+}
